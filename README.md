@@ -1,4 +1,4 @@
-#hp-database
+# hp-database
 
 MysqliDb -- Simple MySQLi wrapper and object mapper with prepared statements
 
