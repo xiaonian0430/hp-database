@@ -1,6 +1,8 @@
 <?php
 namespace HP\Database;
 
+use Exception;
+
 /**
  * Mysqli Model wrapper
  *
@@ -21,8 +23,6 @@ class dbObject {
     private $db;
     /**
      * Models path
-     *
-     * @var modelPath
      */
     protected static $modelPath;
     /**
@@ -77,13 +77,13 @@ class dbObject {
     /**
      * Primary key for an object. 'id' is a default value.
      *
-     * @var stating
+     * @var string
      */
     protected $primaryKey = 'id';
     /**
      * Table name for an object. Class name will be used by default
      *
-     * @var stating
+     * @var string
      */
     protected $dbTable;
 
@@ -107,7 +107,6 @@ class dbObject {
     /**
      * Magic setter function
      *
-     * @return mixed
      */
     public function __set ($name, $value) {
         if (property_exists ($this, 'hidden') && array_search ($name, $this->hidden) !== false)
@@ -118,8 +117,6 @@ class dbObject {
 
     /**
      * Magic getter function
-     *
-     * @param $name Variable name
      *
      * @return mixed
      */
@@ -311,10 +308,9 @@ class dbObject {
      * Get object by primary key.
      *
      * @access public
-     * @param $id Primary Key
+     * @param $id
      * @param array|string $fields Array or coma separated list of fields to fetch
-     *
-     * @return dbObject|array
+     * @return dbObject|null|false
      */
     private function byId ($id, $fields = null) {
         $this->db->where (MysqliDb::$prefix . $this->dbTable . '.' . $this->primaryKey, $id);
@@ -327,7 +323,7 @@ class dbObject {
      * @access public
      * @param array|string $fields Array or coma separated list of fields to fetch
      *
-     * @return dbObject
+     * @return false|dbObject|string
      */
     protected function getOne ($fields = null) {
         $this->processHasOneWith ();
@@ -384,7 +380,7 @@ class dbObject {
      *                             or only $count
      * @param array|string $fields Array or coma separated list of fields to fetch
      *
-     * @return array Array of dbObjects
+     * @return array|false|null Array of dbObjects
      */
     protected function get ($limit = null, $fields = null) {
         $objects = Array ();
@@ -476,7 +472,7 @@ class dbObject {
      * @access public
      * @param int $page Page number
      * @param array|string $fields Array or coma separated list of fields to fetch
-     * @return array
+     * @return array|false|null
      */
     private function paginate ($page, $fields = null) {
         $this->db->pageLimit = self::$pageLimit;

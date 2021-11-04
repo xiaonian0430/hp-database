@@ -1,6 +1,11 @@
 <?php
 namespace HP\Database;
 
+use Exception;
+use mysqli_stmt;
+use ReflectionClass;
+use stdClass;
+
 /**
  * MysqliDb Class
  *
@@ -34,7 +39,6 @@ class MysqliDb
     /**
      * MySQLi instances
      *
-     * @var mysqli[]
      */
     protected $_mysqli = array();
 
@@ -320,8 +324,8 @@ class MysqliDb
             throw new Exception('MySQL host or socket is not set');
         }
 
-        $mysqlic = new ReflectionClass('mysqli');
-        $mysqli = $mysqlic->newInstanceArgs($params);
+        $mysql_ref = new ReflectionClass('mysqli');
+        $mysqli = $mysql_ref->newInstanceArgs($params);
 
         if ($mysqli->connect_error) {
             throw new Exception('Connect Error ' . $mysqli->connect_errno . ': ' . $mysqli->connect_error, $mysqli->connect_errno);
@@ -407,7 +411,6 @@ class MysqliDb
     /**
      * A method to get mysqli object or create it in case needed
      *
-     * @return mysqli
      * @throws Exception
      */
     public function mysqli()
@@ -523,7 +526,6 @@ class MysqliDb
      *
      * @param  [[Type]] $query [[Description]]
      *
-     * @return bool|mysqli_result
      * @throws Exception
      */
 	private function queryUnprepared($query)
@@ -753,7 +755,6 @@ class MysqliDb
      * @param string $tableName The name of the database table to work with.
      * @param string $columns   Desired columns
      *
-     * @return array Contains the returned rows from the select query.
      * @throws Exception
      */
     public function getOne($tableName, $columns = '*')
@@ -830,7 +831,7 @@ class MysqliDb
     public function insertMulti($tableName, array $multiInsertData, array $dataKeys = null)
     {
         // only auto-commit our inserts, if no transaction is currently running
-        $autoCommit = (isset($this->_transaction_in_progress) ? !$this->_transaction_in_progress : true);
+        $autoCommit = (!isset($this->_transaction_in_progress) || !$this->_transaction_in_progress);
         $ids = array();
 
         if($autoCommit) {
@@ -902,7 +903,7 @@ class MysqliDb
     public function update($tableName, $tableData, $numRows = null)
     {
         if ($this->isSubQuery) {
-            return;
+            return false;
         }
 
         $this->_query = "UPDATE " . self::$prefix . $tableName;
@@ -930,7 +931,7 @@ class MysqliDb
     public function delete($tableName, $numRows = null)
     {
         if ($this->isSubQuery) {
-            return;
+            return false;
         }
 
         $table = self::$prefix . $tableName;
@@ -1168,7 +1169,6 @@ class MysqliDb
 		if(!file_exists($importFile)) {
 			// Does not exists
 			throw new Exception("loadXml: Import file does not exists");
-			return;
 		}
 
 		// Create default values
@@ -1345,9 +1345,6 @@ class MysqliDb
 		else {
 			throw new Exception("Locking of table ".$table." failed", $errno);
 		}
-
-		// Return the success value
-		return false;
 	}
 
     /**
@@ -1379,10 +1376,6 @@ class MysqliDb
 		else {
 			throw new Exception("Unlocking of tables failed", $errno);
 		}
-
-
-		// Return self
-		return $this;
 	}
 
 
@@ -1517,7 +1510,7 @@ class MysqliDb
     private function _buildInsert($tableName, $insertData, $operation)
     {
         if ($this->isSubQuery) {
-            return;
+            return false;
         }
 
         $this->_query = $operation . " " . implode(' ', $this->_queryOptions) . " INTO " . self::$prefix . $tableName;
@@ -1578,7 +1571,7 @@ class MysqliDb
         $this->_lastQuery = $this->replacePlaceHolders($this->_query, $this->_bindParams);
 
         if ($this->isSubQuery) {
-            return;
+            return false;
         }
 
         // Prepare query
@@ -2503,5 +2496,3 @@ class MysqliDb
         }
     }
 }
-
-// END class
