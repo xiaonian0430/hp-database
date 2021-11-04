@@ -1,4 +1,11 @@
 <?php
+/**
+ * db 驱动
+ * @author: Xiao Nian
+ * @contact: xiaonian030@163.com
+ * @datetime: 2021-09-14 10:00
+ */
+
 namespace HP\Database;
 
 use Exception;
