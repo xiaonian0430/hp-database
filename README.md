@@ -1,5 +1,6 @@
+#hp-database
+
 MysqliDb -- Simple MySQLi wrapper and object mapper with prepared statements
-<hr>
 
 ### Table of Contents
 
@@ -45,7 +46,7 @@ require_once ('MysqliDb.php');
 ### Installation with composer
 It is also possible to install library via composer
 ```
-composer require thingengineer/mysqli-database-class:dev-master
+composer require hiper/database
 ```
 
 ### Initialization
